@@ -17,6 +17,13 @@ RUN curl -Lo node.tar.xz https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x6
     && rm node.tar.xz \
     && echo "export PATH=\$PATH:/root/node-v18.16.0-linux-x64/bin" >>.bashrc
 ENV PATH=$PATH:/root/node-v18.16.0-linux-x64/bin
+# python 설치
+#   간단히 버전을 명기하는 방법은 없는것 같음
+#   버전을 지정하려고 직업 build 하는 것은 시간이 너무 오래 결림
+#   23.05 3.9.2 설치
+RUN apt install pip python3 -y \
+    && python3 -m pip install --upgrade pip
+
 
 
 FROM nginx-base as test-dev
@@ -35,12 +42,17 @@ RUN cp server_conf/nginx.conf /etc/nginx/conf.d/default.conf
 
 
 FROM nginx-base as run-dev
+WORKDIR ${BASE_DIR}
+# vue
 COPY ipsum-app-web ipsum-app-web
-WORKDIR ${BASE_DIR}/ipsum-app-web
-RUN npm install \
-    && npm run build \
+RUN npm install --prefix ${BASE_DIR}/ipsum-app-web \
     && chmod -R 777 /root
-ENTRYPOINT [ "/bin/bash", "-c", "npm run dev -- --port 3000 --host" ]
+# flask
+COPY ipsum-app-api ipsum-app-api
+RUN pip install -r ipsum-app-api/requirements.txt
+
+WORKDIR ${BASE_DIR}
+ENTRYPOINT [ "/bin/bash", "-c", "npm run dev --prefix ipsum-app-web -- --port 3000 --host & python3 ipsum-app-api/app.py" ]
 
 
 FROM ${APP_ENV} AS final

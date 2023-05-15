@@ -1,5 +1,9 @@
-ARG APP_ENV=test-dev
-FROM nginx:stable as nginx-base 
+ARG APP_ENV=dev
+FROM nginx:stable as nginx-base
+# 첫 ARG 는 아래 FROM 절에서 쓰이고 두번째 ARG 는 ENV 에서 쓰임
+# 아래 FROM 절은 두번째 ARG 보다도 뒤에 위치하지만
+#   첫 FROM 절 이전에 ARG 가 있어야 이후의 모든 FROM 절에서 사용할 수 있는 듯 함
+ARG APP_ENV
 
 ENV BASE_DIR=/root
 RUN apt update \
@@ -26,7 +30,7 @@ RUN apt install pip python3 -y \
 
 
 
-FROM nginx-base as test-dev
+FROM nginx-base as dev
 # web, dist 디렉토리로 빌드
 #   chmod: nginx 가 접근할 수 있게
 COPY ipsum-app-web ipsum-app-web
@@ -41,7 +45,7 @@ RUN cp server_conf/nginx.conf /etc/nginx/conf.d/default.conf
 # use nginx default ENTRYPOINT
 
 
-FROM nginx-base as run-dev
+FROM nginx-base as run_dev
 WORKDIR ${BASE_DIR}
 # vue
 COPY ipsum-app-web ipsum-app-web

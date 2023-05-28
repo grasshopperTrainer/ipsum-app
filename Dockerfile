@@ -43,19 +43,23 @@ WORKDIR ${BASE_DIR}
 COPY entrypoint.sh .
 RUN envsubst < entrypoint.sh > /entrypoint.sh \
     && chmod 777 /entrypoint.sh
+# nginx
+WORKDIR ${BASE_DIR}
+COPY server_conf server_conf
+RUN envsubst < server_conf/nginx_${APP_PHASE}.conf > /etc/nginx/conf.d/default.conf
+
 
 FROM nginx-base as dev
 # web, dist 디렉토리로 빌드
 #   chmod: nginx 가 접근할 수 있게
 COPY web web
-WORKDIR ${BASE_DIR}/web
-RUN npm install \
-    && npm run build \
-    && chmod -R 777 /root
-# nginx 셋팅
 WORKDIR ${BASE_DIR}
-COPY server_conf server_conf
-RUN envsubst < server_conf/nginx_${APP_PHASE}.conf > /etc/nginx/conf.d/default.conf
+RUN npm install --prefix ${BASE_DIR}/web \
+    && npm run build --prefix ${BASE_DIR}/web \
+    && chmod -R 777 /root
+# flask
+COPY api api
+RUN pip install -r api/requirements.txt
 
 
 FROM nginx-base as run_dev
@@ -67,11 +71,7 @@ RUN npm install --prefix ${BASE_DIR}/web \
 # flask
 COPY api api
 RUN pip install -r api/requirements.txt
-# nginx
-COPY server_conf server_conf
-RUN envsubst < server_conf/nginx_${APP_PHASE}.conf > /etc/nginx/conf.d/default.conf
-# bind flask with gunicorn
-ENTRYPOINT [ "/entrypoint.sh" ]
 
 
 FROM ${APP_PHASE} AS final
+ENTRYPOINT [ "/entrypoint.sh" ]

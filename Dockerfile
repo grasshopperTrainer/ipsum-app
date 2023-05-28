@@ -47,7 +47,7 @@ RUN envsubst < entrypoint.sh > /entrypoint.sh \
 FROM nginx-base as dev
 # web, dist 디렉토리로 빌드
 #   chmod: nginx 가 접근할 수 있게
-COPY ipsum-app-web web
+COPY web web
 WORKDIR ${BASE_DIR}/web
 RUN npm install \
     && npm run build \
@@ -61,11 +61,11 @@ RUN envsubst < server_conf/nginx_${APP_PHASE}.conf > /etc/nginx/conf.d/default.c
 FROM nginx-base as run_dev
 WORKDIR ${BASE_DIR}
 # vue
-COPY ipsum-app-web web
+COPY web web
 RUN npm install --prefix ${BASE_DIR}/web \
     && chmod -R 777 /root
 # flask
-COPY ipsum-app-api api
+COPY api api
 RUN pip install -r api/requirements.txt
 # nginx
 COPY server_conf server_conf

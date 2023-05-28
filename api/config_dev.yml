@@ -1,4 +1,4 @@
 ENV: development
 DEBUG: True
-HOST: 0.0.0.0
+HOST: localhost
 PORT: 5000

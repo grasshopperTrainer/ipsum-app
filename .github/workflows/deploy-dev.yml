@@ -18,7 +18,7 @@ jobs:
       - name: configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::798037471526:oidc-provider/token.actions.githubusercontent.com
+          role-to-assume: arn:aws:iam::798037471526:role/github_action
           aws-region: ap-northeast-2
       - name: build image
         run: docker-compose -f compose.dev.yml build

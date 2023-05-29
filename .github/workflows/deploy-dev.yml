@@ -1,5 +1,5 @@
 name: deploy dev stage
-run-name: run by ${{ github.actor }} with ${{ github.sha }}
+run-name: run by "${{ github.actor }}" with "${{ github.sha }}"
 on: [push]
 jobs:
   Explore-GitHub-Actions:
@@ -10,9 +10,14 @@ jobs:
       contents: read
     env:
       IMAGE_NAME: ${{ github.event.repository.name }}_web-api # suffix compose.yml 파일안에서 지정된 이름 사용
-      IMAGE_FILE_NAME: ${IMAGE_NAME}_${{ github.sha	}}
+      IMAGE_FILE_NAME: ${IMAGE_NAME}_${{ github.sha	}}.tar
       S3_BUCKET_NAME: stayout-campground
     steps:
+      - name: check environment variables
+        run: |
+          echo "IMAGE_NAME: ${IMAGE_NAME}"
+          echo "IMAGE_FILE_NAME: ${IMAGE_FILE_NAME}"
+          echo "S3_BUCKET_NAME: ${S3_BUCKET_NAME}"
       - name: checkout
         uses: actions/checkout@v3
       - name: configure AWS credentials
@@ -20,11 +25,11 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::798037471526:role/github_action
           aws-region: ap-northeast-2
-      - name: build image
+      - name: image build
         run: docker-compose -f compose.dev.yml build
-      - name: compress
-        run: docker save -o ${IMAGE_FILE_NAME}.tar ${IMAGE_NAME}
-      - name: upload to s3
-        run: aws s3 cp ./${IMAGE_NAME}.tar s3://${S3_BUCKET_NAME}/${IMAGE_NAME}.zip
+      - name: image compress 
+        run: docker save -o ${IMAGE_FILE_NAME} ${IMAGE_NAME}
+      - name: image upload to s3
+        run: aws s3 cp ./${IMAGE_FILE_NAME} s3://${S3_BUCKET_NAME}/${IMAGE_FILE_NAME}
         
       

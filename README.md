@@ -11,22 +11,7 @@ api 의 경우 nginx reverse proxy - gunicorn - flask 를 통해 제공됨
   - APP_PHASE=run_dev
 - 빌드/실행:
 ```bash
-docker build \
-  --build-arg APP_PHASE=run_dev \
-  --build-arg GUNICORN_DOMAIN=localhost \
-  --build-arg GUNICORN_PORT=8000 \
-  --build-arg VUE_DOMAIN=localhost \
-  --build-arg VUE_PORT=3000 \
-  -t stayout_campground_run_dev .
-# 두번째 volume:
-#   -v single argument: 해당 위치에 이름 없는(anonymous) 볼륨을 마운트 - 컨테이너가 삭제되어도 살아있는 데이터. 이미 이미지의 해당 위치에 데이터가 존재할 경우, 해당 데이터를 볼륨으로 그대로 감싸는 듯 함
-#   이 경우: 특정 플렛폼에서 빌드(이 경우 도커 컨테이너의 리눅스에서의 빌드(Dockerfile 을 통해))된 js package 를 사용해야 정상 동작하므로, 앞선 첫번째 마운트에서 package 디렉토리만 제외하기 위해 사용
-docker run \
-  -v $(pwd)/web:/root/web \
-  -v /root/web/node_modules \
-  -v $(pwd)/api:/root/api \
-  -p 80:80 \
-  stayout_campground_run_dev
+docker-compose -f compose.run_dev.yml up --build
 ```
 
 ## 테스트 dev

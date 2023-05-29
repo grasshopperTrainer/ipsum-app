@@ -1,0 +1,30 @@
+name: deploy dev stage
+run-name: run by ${{ github.actor }} with ${{ github.sha }}
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      IMAGE_NAME: ${{ github.event.repository.name }}_web-api # suffix compose.yml 파일안에서 지정된 이름 사용
+      IMAGE_FILE_NAME: ${IMAGE_NAME}_${{ github.sha	}}
+      S3_BUCKET_NAME: stayout-campground
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::798037471526:oidc-provider/token.actions.githubusercontent.com
+          aws-region: ap-northeast-2
+      - name: build image
+        run: docker-compose -f compose.dev.yml build
+      - name: compress
+        run: docker save -o ${IMAGE_FILE_NAME}.tar ${IMAGE_NAME}
+      - name: upload to s3
+        run: aws s3 cp ./${IMAGE_NAME}.tar s3://${S3_BUCKET_NAME}/${IMAGE_NAME}.zip
+        
+      

@@ -40,7 +40,7 @@ jobs:
         # docker_images.tar: name of internal convention for docker image archive
         run: |
           docker save ${{ env.IMAGE_NAME }} -o docker_images.tar
-          tar -czvf ${{ env.S3_KEY_NAME }} docker_images.tar ${{ env.ENV_FILE_NAME }} compose.dev.yml -C ./codedeploy .
+          tar -czvf ${{ env.S3_KEY_NAME }} docker_images.tar compose.dev.yml -C ./codedeploy .
       - name: codedeploy bundle upload to s3
         run: aws s3 cp ./${{ env.S3_KEY_NAME }} s3://${{ env.S3_BUCKET_NAME }}/${{ env.S3_KEY_NAME }}
       - name: codedeploy triger

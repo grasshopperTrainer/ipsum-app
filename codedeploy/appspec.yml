@@ -1,9 +1,15 @@
 version: 0.0
 os: linux
+files:
+  # 복사 없이 스크립트에서 도커 이미지를 로딩하려 했으나
+  # 워킹디렉토리가 불분명하여 상대 경로 사용이 까다로움
+  # 절대경로를 사용하도록 데이터 지정 위치로 복사
+  - source: /
+    destination: /deploy
+file_exists_behavior: OVERWRITE
 hooks:
-  ApplicationStop:
-    - location: scripts/docker_clean_container.sh
   AfterInstall:
+    - location: scripts/docker_clean_container.sh
     - location: scripts/docker_load_image.sh
   ApplicationStart:
     - location: scripts/docker_start_container.sh

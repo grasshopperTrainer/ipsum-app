@@ -1,6 +1,9 @@
 name: deploy dev stage
 run-name: run by "${{ github.actor }}" with "${{ github.sha }}"
-on: [push]
+on:
+  push:
+    branches:
+      - dev
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest

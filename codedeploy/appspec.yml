@@ -1,0 +1,9 @@
+version: 0.0
+os: linux
+hooks:
+  ApplicationStop:
+    - location: scripts/docker_clean_container.sh
+  AfterInstall:
+    - location: scripts/docker_load_image.sh
+  ApplicationStart:
+    - location: scripts/docker_start_container.sh

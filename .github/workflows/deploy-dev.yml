@@ -1,0 +1,51 @@
+name: deploy dev stage
+run-name: run by "${{ github.actor }}" with "${{ github.sha }}"
+on:
+  push:
+    branches:
+      - dev
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      IMAGE_NAME: ${{ github.event.repository.name }}_web-api # suffix compose.yml 파일안에서 지정된 이름 사용
+      S3_KEY_NAME: ${{ github.event.repository.name }}_web-api_${{ github.sha	}}.tar.gz
+      S3_BUCKET_NAME: stayout-campground
+      CODEDEPLOY_APPLICATION_NAME: stayout-campground
+      CODEDEPLOY_DEPLOYMENT_GROUP_NAME: dev
+    steps:
+      - name: check environment variables
+        run: |
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME}}"
+          echo "S3_KEY_NAME=${{ env.S3_KEY_NAME }}"
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::798037471526:role/github_action
+          aws-region: ap-northeast-2
+      - name: image build
+        run: docker-compose -f compose.dev.yml build
+      - name: image bundle with codedeploy artifacts
+        # tar: 이미지와 기타 파일들 모아 압축파일 생성
+        #   -c: create
+        #   -z: compress
+        #   -v: verbouse
+        #   -f: output file
+        # docker_images.tar: name of internal convention for docker image archive
+        run: |
+          docker save ${{ env.IMAGE_NAME }} -o docker_images.tar
+          tar -czvf ${{ env.S3_KEY_NAME }} docker_images.tar ${{ env.ENV_FILE_NAME }} compose.dev.yml -C ./codedeploy .
+      - name: codedeploy bundle upload to s3
+        run: aws s3 cp ./${{ env.S3_KEY_NAME }} s3://${{ env.S3_BUCKET_NAME }}/${{ env.S3_KEY_NAME }}
+      - name: codedeploy triger
+        run: | 
+          aws deploy create-deployment \
+          --application-name ${{ env.CODEDEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=tgz,key=${{ env.S3_KEY_NAME }}

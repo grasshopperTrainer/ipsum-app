@@ -1,1 +1,1 @@
-docker load -i image docker_images.tar
+docker load -i docker_images.tar

@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: check environment variables
         run: |
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME}}" >> ${{ env.ENV_FILE_NAME }}
-          echo "S3_KEY_NAME=${{ env.S3_KEY_NAME }}" >> ${{ env.ENV_FILE_NAME }}
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME}}"
+          echo "S3_KEY_NAME=${{ env.S3_KEY_NAME }}"
       - name: checkout
         uses: actions/checkout@v3
       - name: configure AWS credentials

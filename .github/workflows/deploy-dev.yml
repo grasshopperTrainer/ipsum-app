@@ -10,14 +10,15 @@ jobs:
       contents: read
     env:
       IMAGE_NAME: ${{ github.event.repository.name }}_web-api # suffix compose.yml 파일안에서 지정된 이름 사용
-      IMAGE_FILE_NAME: ${IMAGE_NAME}_${{ github.sha	}}.tar
+      S3_KEY_NAME: ${{ github.event.repository.name }}_web-api_${{ github.sha	}}.tar.gz
       S3_BUCKET_NAME: stayout-campground
+      CODEDEPLOY_APPLICATION_NAME: stayout-campground
+      CODEDEPLOY_DEPLOYMENT_GROUP_NAME: dev
     steps:
       - name: check environment variables
         run: |
-          echo "IMAGE_NAME: ${IMAGE_NAME}"
-          echo "IMAGE_FILE_NAME: ${IMAGE_FILE_NAME}"
-          echo "S3_BUCKET_NAME: ${S3_BUCKET_NAME}"
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME}}" >> ${{ env.ENV_FILE_NAME }}
+          echo "S3_KEY_NAME=${{ env.S3_KEY_NAME }}" >> ${{ env.ENV_FILE_NAME }}
       - name: checkout
         uses: actions/checkout@v3
       - name: configure AWS credentials
@@ -27,9 +28,20 @@ jobs:
           aws-region: ap-northeast-2
       - name: image build
         run: docker-compose -f compose.dev.yml build
-      - name: image compress 
-        run: docker save -o ${IMAGE_FILE_NAME} ${IMAGE_NAME}
+      - name: image compress
+        # tar: 이미지와 기타 파일들 모아 압축파일 생성
+        #   -c: create
+        #   -z: compress
+        #   -v: verbouse
+        #   -f: output file
+        run: |
+          docker save ${{ env.IMAGE_NAME }} -o docker_images.tar
+          tar -czvf ${{ env.S3_KEY_NAME }} docker_images.tar ${{ env.ENV_FILE_NAME }} compose.dev.yml -C ./codedeploy .
       - name: image upload to s3
-        run: aws s3 cp ./${IMAGE_FILE_NAME} s3://${S3_BUCKET_NAME}/${IMAGE_FILE_NAME}
-        
-      
+        run: aws s3 cp ./${{ env.S3_KEY_NAME }} s3://${{ env.S3_BUCKET_NAME }}/${{ env.S3_KEY_NAME }}
+      - name: codedeploy
+        run: | 
+          aws deploy create-deployment \
+          --application-name ${{ env.CODEDEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=tgz,key=${{ env.S3_KEY_NAME }}

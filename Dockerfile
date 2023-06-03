@@ -30,6 +30,7 @@ RUN curl -Lo node.tar.xz https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x6
     && rm node.tar.xz \
     && echo "export PATH=\$PATH:/root/node-v18.16.0-linux-x64/bin" >>.bashrc
 ENV PATH=$PATH:/root/node-v18.16.0-linux-x64/bin
+RUN npm install -g @ionic/cli
 # python 설치
 #   간단히 버전을 명기하는 방법은 없는것 같음
 #   버전을 지정하려고 직업 build 하는 것은 시간이 너무 오래 결림

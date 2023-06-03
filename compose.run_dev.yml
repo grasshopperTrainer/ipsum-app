@@ -1,6 +1,5 @@
 services:
-  web-api:
-    image: stayout-campground_web-api
+  web-api-run-dev:
     build:
       context: .
       dockerfile: Dockerfile

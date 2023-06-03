@@ -11,7 +11,7 @@ api 의 경우 nginx reverse proxy - gunicorn - flask 를 통해 제공됨
 ```bash
 # -d: detached; 백그라운드에서 실행
 # --build: 이미지가 존재해도 빌드 후 실행 
-docker-compose -d -f compose.run_dev.yml up --build
+docker compose -f compose.run_dev.yml up --build -d
 ```
 
 ## 테스트 dev
@@ -20,7 +20,7 @@ docker-compose -d -f compose.run_dev.yml up --build
 ```bash
 # -d: detached; 백그라운드에서 실행
 # --build: 이미지가 존재해도 빌드 후 실행 
-docker-compose -d -f compose.dev.yml up --build
+docker compose -f compose.dev.yml up --build -d 
 ```
 
 ## 배포 prod

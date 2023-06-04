@@ -47,7 +47,7 @@ RUN envsubst < entrypoint.sh > /entrypoint.sh \
 # nginx
 WORKDIR ${BASE_DIR}
 COPY server_conf server_conf
-RUN envsubst < server_conf/nginx_${APP_PHASE}.conf > /etc/nginx/conf.d/default.conf
+RUN envsubst < server_conf/nginx_${APP_PHASE}.conf | 's/%/$/g' > /etc/nginx/conf.d/default.conf
 
 
 FROM nginx-base as dev

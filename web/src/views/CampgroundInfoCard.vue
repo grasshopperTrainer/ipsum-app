@@ -7,8 +7,8 @@
       <div v-if="op.isFranchiseePresent() && op.isCampgroundsPresent()">
         <ion-list>
           <ion-item v-for="campg in op.campgrounds">
-            <ion-toggle labelPlacement="start" justify="space-between" :checked="campg.isActivated" @ionChange="onToggle"
-              :value="campg">
+            <ion-toggle labelPlacement="start" justify="space-between" :checked="campg.isActivated"
+              @click="onToggleClick(campg)" @ionChange="onToggle">
               {{ campg.name }}
             </ion-toggle>
           </ion-item>
@@ -22,7 +22,8 @@
       </div>
       <ion-toolbar>
         <ion-buttons slot="primary">
-          <ion-button id="open-create-campg" @click="() => isModalOpen = true" :disabled="!op.isFranchiseePresent()"> 추가 </ion-button>
+          <ion-button id="open-create-campg" @click="() => isModalOpen = true" :disabled="!op.isFranchiseePresent()"> 추가
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-card-content>
@@ -33,7 +34,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  IonToolbar, IonCard, IonAlert, alertController,
+  IonToolbar, IonCard, IonAlert, alertController, ToggleCustomEvent,
   IonCardHeader, IonCardTitle, IonCardContent,
   IonToggle, IonButtons, IonButton, IonList, IonItem
 } from '@ionic/vue';
@@ -44,6 +45,7 @@ import Campground from '@/assets/ts/interfaces/Campground';
 
 const isModalOpen = ref(false)
 const op = useOperator()
+const campgToggled = ref<null | Campground>(null)
 
 function onClickCancel() {
   isModalOpen.value = false
@@ -51,8 +53,12 @@ function onClickCancel() {
 function onClickAccept() {
   isModalOpen.value = false
 }
-async function onToggle(ev: CustomEvent<ToggleChangeEventDetail<Campground>>) {
-  const campg = ev.detail.value
+function onToggleClick(campg: Campground) {
+  campgToggled.value = campg
+}
+async function onToggle(ev: ToggleCustomEvent) {
+  const campg = campgToggled.value!
+  campgToggled.value = null
   // 토글시 워닝
   if (ev.detail.checked) {
     // 이 시점에서 isToggleChecked 는 아직 true 로 업데이트 되지 않았음

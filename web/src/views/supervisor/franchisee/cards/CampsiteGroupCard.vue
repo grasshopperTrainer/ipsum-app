@@ -20,7 +20,7 @@
                              button
                              :toggle-checked="campsGroup.isActive"
                              @click-toggle="onClickToggle(campsGroup)"
-                             @click-item="toCreateEdit = campsGroup">
+                             @click-item="toCreateEdit = campsGroup; isInit = false">
               {{ campsGroup.name }}
             </ion-item-toggle>
           </template>
@@ -29,10 +29,14 @@
       <ion-toolbar>
         <ion-buttons slot="primary">
           <sandbox>
-            <ion-button @click="() => toCreateEdit = franch.createCampsiteGroup(null)"> 추가 </ion-button>
+            <ion-button @click="() => { toCreateEdit = franch.createCampsiteGroup(null); isInit = true }">
+              추가
+            </ion-button>
           </sandbox>
-          <ion-button @click="() => toCreateEdit = franch.createCampsiteGroup(null)"
-                      :disabled="!(franch.isCampgroundPresent(props.franchisee.id!))"> 추가 </ion-button>
+          <ion-button @click="() => { toCreateEdit = franch.createCampsiteGroup(null); isInit = true }"
+                      :disabled="!(franch.isCampgroundPresent(props.franchisee.id!))">
+            추가
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-card-content>
@@ -41,11 +45,12 @@
                        :is-before-edit="toCreateEdit!.id != null"
                        @clickCancel="toCreateEdit = null"
                        @clickAccept="campsGroup => { franch.registerCampsiteGroup(campsGroup); toCreateEdit = null }"
-                       @clickDelete="campsGroup => { franch.deleteCampsiteGroup(campsGroup); toCreateEdit = null}"
+                       @clickDelete="campsGroup => { franch.deleteCampsiteGroup(campsGroup); toCreateEdit = null }"
                        #default="{ item, isBeforeEdit }">
       <campsite-group-form :franchisee="props.franchisee"
                            :campsite-group="item"
-                           :readony="isBeforeEdit">
+                           :readonly="isBeforeEdit"
+                           :init="isInit">
       </campsite-group-form>
     </create-edit-modal>
   </ion-card>
@@ -70,6 +75,7 @@ const props = defineProps<{
 const franch = useFranchisee()
 const campsToggled = ref<null | CampsiteGroup>(null) // toggle 대상
 const toCreateEdit = ref<null | CampsiteGroup>(null)
+const isInit = ref(false)
 
 function onClickToggle(campsGroup: CampsiteGroup) {
   console.log('onToggle', campsGroup)

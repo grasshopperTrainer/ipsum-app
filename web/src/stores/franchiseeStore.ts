@@ -7,7 +7,7 @@ import type CampsiteGroup from '@/assets/ts/interfaces/CampsiteGroup'
 import type Campsite from '@/assets/ts/interfaces/Campsite'
 import { logoIonic } from 'ionicons/icons'
 import MeritGroup from '@/assets/ts/interfaces/MeritGroup'
-import { updateItemProps } from './utils'
+import { updateItemProps, removeFromArray } from './utils'
 
 export const useFranchisee = defineStore('franchisee', () => {
     const franchisees = ref<Franchisee[]>([])
@@ -121,15 +121,23 @@ export const useFranchisee = defineStore('franchisee', () => {
             campsGroup.id = getId()
             // camps 는 group 생성 과정 중에 함께 생성되어 id 가 없음
             campsGroup.campsites.forEach(x => x.campsiteGroupId = campsGroup.id)
-            campg.campsiteGroups.push(campsGroup)
         } else {
             const oldCampsGroup = getCampsiteGroup(campsGroup.id)
             if (oldCampsGroup) {
+                const oldCampg = getCampground(oldCampsGroup.campgroundId)
+                if (oldCampg != null) {
+                    removeFromArray(
+                        oldCampg.campsiteGroups,
+                        campsGroup,
+                        (arrayItem: CampsiteGroup, item: CampsiteGroup) => arrayItem.id == item.id
+                    )
+                }
                 updateItemProps(oldCampsGroup, campsGroup)
             } else {
                 throw { error: 'unknown campsiteGroup' }
             }
         }
+        campg.campsiteGroups.push(campsGroup)
     }
     function registerCampsite(camps: Campsite, campsGroup: CampsiteGroup) {
         // campsiteGroup 이 등록되기 이전에 편집할 수 있으므로, 예외적으로 부모 객체를 받아서 처리해야 함
@@ -183,11 +191,7 @@ export const useFranchisee = defineStore('franchisee', () => {
     }
 
     function deleteFranchisee(franchisee: Franchisee) {
-        let idx
-        franchisees.value.forEach((x, i) => {
-            if (x.id == franchisee.id) idx = i
-        })
-        if (idx != null) return franchisees.value.splice(idx, 1)[0]
+        return removeFromArray(franchisee.value, franchisee, (arrayItem: Franchisee, item: Franchisee) => arrayItem.id == item.id)
     }
 
     function deleteCampground(campg: Campground) {

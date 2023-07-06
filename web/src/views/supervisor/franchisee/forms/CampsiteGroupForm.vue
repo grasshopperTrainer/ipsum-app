@@ -8,42 +8,33 @@
   </ion-header>
   <ion-content :scroll-x="true">
     <simple-ion-list :inset="true">
-      <ion-item v-if="!props.readony">
-        <ion-select label="캠프그라운드"
-                    interface="popover"
-                    placeholder="사이트가 소속된 캠프그라운드 선택"
-                    :selected-text="franch.getCampground(props.campsiteGroup.campgroundId)?.name"
-                    @ionChange="e => props.campsiteGroup.campgroundId = e.detail.value.id">
-          <ion-select-option v-for="campg in props.franchisee.campgrounds"
-                             :value="campg">
-            {{ campg.name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item v-else>
-        <ion-label>
-          캠프그라운드
-        </ion-label>
-        <ion-label slot="end"
-                   color="medium">
-          {{ franch.getCampground(props.campsiteGroup.campgroundId)?.name }}
-        </ion-label>
+      <ion-item>
+        <readonlyable-select label="캠프그라운드"
+                             interface="popover"
+                             placeholder="사이트가 소속된 캠프그라운드 선택"
+                             :readonly="props.readonly || !props.init"
+                             :readonly-text="franch.getCampground(props.campsiteGroup.campgroundId) == null ? '' : franch.getCampground(props.campsiteGroup.campgroundId)!.name"
+                             :items="props.franchisee.campgrounds"
+                             @ionChange="(item: Campground) => props.campsiteGroup.campgroundId = item.id!"
+                             #default="{ item }">
+          {{ item.name }}
+        </readonlyable-select>
       </ion-item>
       <ion-item>
         <ion-input label="이름"
                    placeholder="e.g. 탠트구역A"
                    v-model="props.campsiteGroup.name"
-                   :readonly="props.readony"></ion-input>
+                   :readonly="props.readonly"></ion-input>
       </ion-item>
       <ion-item>
         <ion-textarea label="설명"
                       placeholder="캠프사이트에 대한 설명"
                       v-model="props.campsiteGroup.description"
-                      :readonly="props.readony"></ion-textarea>
+                      :readonly="props.readonly"></ion-textarea>
       </ion-item>
       <ion-item>
         <ion-label> 체크인-아웃 </ion-label>
-        <range-time-picker :disabled="props.readony"
+        <range-time-picker :disabled="props.readonly"
                            :start-value="props.campsiteGroup.checkin"
                            :end-value="props.campsiteGroup.checkout"
                            @ion-change-start="e => props.campsiteGroup.checkin = e.detail.value"
@@ -61,12 +52,12 @@
         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-        <campsite-merits-selector :readonly="props.readony"
+        <campsite-merits-selector :readonly="props.readonly"
                                   v-model="props.campsiteGroup.merits"></campsite-merits-selector>
       </ion-card-content>
     </ion-card>
     <campsite-card :campsite-group="props.campsiteGroup"
-                   :readonly="props.readony"></campsite-card>
+                   :readonly="props.readonly"></campsite-card>
   </ion-content>
 </template>
 
@@ -75,8 +66,7 @@ import { ref, watch } from 'vue'
 import {
   IonHeader, IonContent,
   IonToolbar, IonTitle,
-  IonInput, IonItem, IonLabel, IonNote,
-  IonSelect, IonSelectOption,
+  IonInput, IonItem, IonLabel,
   IonTextarea,
   IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
 } from '@ionic/vue'
@@ -85,11 +75,14 @@ import { useFranchisee } from '@/stores/franchiseeStore'
 import CampsiteMeritsSelector from '../etc/CampsiteMeritsSelector.vue'
 import CampsiteCard from '../cards/CampsiteCard.vue'
 import RangeTimePicker from '@/components/RangeTimePicker.vue'
+import ReadonlyableSelect from '@/components/ReadonlyableSelect.vue'
 import type CampsiteGroup from '@/assets/ts/interfaces/CampsiteGroup'
 import type Franchisee from '@/assets/ts/interfaces/Franchisee'
+import Campground from '@/assets/ts/interfaces/Campground'
 
 const props = defineProps<{
-  readony: boolean
+  readonly: boolean
+  init: boolean
   campsiteGroup: CampsiteGroup
   franchisee: Franchisee
 }>()

@@ -7,7 +7,7 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <!-- <campsite-info-card></campsite-info-card> -->
+      <campsite-info-card></campsite-info-card>
       <campground-info-card></campground-info-card>
       <franchisee-info-card></franchisee-info-card>
     </ion-content>
@@ -15,10 +15,9 @@
 </template>
 
 <script setup lang="ts">
-
+import { ref} from 'vue'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue'
-import FranchiseeInfoCard from '@/views/FranchiseeInfoCard.vue'
-import CampgroundInfoCard from '@/views/CampgroundInfoCard.vue'
-import CampsiteInfoCard from '@/views/CampsiteInfoCard.vue'
-
+import FranchiseeInfoCard from '@/views/manage/FranchiseeCard.vue'
+import CampgroundInfoCard from '@/views/manage/CampgroundCard.vue'
+import CampsiteInfoCard from '@/views/manage/CampsiteCard.vue'
 </script>

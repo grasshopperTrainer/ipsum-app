@@ -1,5 +1,7 @@
 export default interface Campsite {
+    id: number | null
+    coordinate: string | null
+    campsiteGroupId: number | null
     name: string
-    uuid?: string
-    coordination?: string
+    isActive: boolean
 }

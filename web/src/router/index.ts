@@ -1,32 +1,53 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import { createRouter, createWebHistory } from '@ionic/vue-router'
+import { RouteRecordRaw } from 'vue-router'
+import LandingPage from '@/views/LandingPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/tab1'
+    component: LandingPage,
   },
   {
-    path: '/tabs/',
-    component: TabsPage,
+    path: '/supervisor',
+    component: () => import('@/views/supervisor/WithSideMenu.vue'),
     children: [
       {
+        name: 'supervisor',
         path: '',
-        redirect: '/tabs/tab1'
+        redirect: '/supervisor/operator'
       },
       {
-        path: 'tab1',
-        component: () => import('@/views/Tab1Page.vue')
+        path: 'operator',
+        component: () => import('@/views/supervisor/operator/MainPage.vue'),
+        children: [
+          {
+            name: 'operator',
+            path: '',
+            component: () => import('@/views/supervisor/operator/ListPage.vue'),
+          },
+          {
+            name: 'operatorDetail',
+            path: ':id',
+            component: () => import('@/views/supervisor/operator/DetailPage.vue')
+          }
+        ]
       },
       {
-        path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue')
+        path: 'franchisee',
+        component: () => import('@/views/supervisor/franchisee/MainPage.vue'),
+        children: [
+          {
+            name: 'franchisee',
+            path: '',
+            component: () => import('@/views/supervisor/franchisee/ListPage.vue'),
+          },
+          {
+            name: 'franchiseeDetail',
+            path: ':id',
+            component: () => import('@/views/supervisor/franchisee/DetailPage.vue')
+          }
+        ]
       },
-      {
-        path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue')
-      }
     ]
   }
 ]
